@@ -1,0 +1,2 @@
+volums:
+	- db_data:/var/lib/mysql
