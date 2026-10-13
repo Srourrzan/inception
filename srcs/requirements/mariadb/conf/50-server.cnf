@@ -1,0 +1,9 @@
+[mysqld]
+# listen to all interfaces
+bind-address = 0.0.0.0
+# this will enable TCP/IP 
+skip-networking = 0
+# Tell MariaDB where to store the actual database files
+datadir = /var/lib/mysql
+# Standard MySQL/MariaDB port
+port = 3306

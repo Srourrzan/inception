@@ -1,5 +1,2 @@
-services:
-
-volumes:
-
-networks:
+Volums:
+	- db_data:/var/lib/mysql
