@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # 1. Start MariaDB in background (temporary)
 # 2. Wait until it accepts connections (with a loop - this is OK because it has an exit condition)
 # 3. Run initialization SQL:
@@ -10,11 +12,12 @@
 # 5. Start MariaDB in FOREGROUND using `exec` (this replaces the shell with MariaDB as PID 1)
 
 # To populate mariaDB data dir
-if mysql-install-db --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data; then
+if mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql; then
 	echo "Success: mariaDB data dir wis populated."
 else
 	echo "Error: Failed to populate mariaDB data dir."
+	exit 1
 fi
 
 # Start MariaDB
-/var/lib/mysql && echo "Success: starting mariaDB" || echo "Failed to start mariaDB"
+exec mariadb --user=mysql
