@@ -11,6 +11,10 @@
 # 4. Stop the temporary MariaDB cleanly
 # 5. Start MariaDB in FOREGROUND using `exec` (this replaces the shell with MariaDB as PID 1)
 
+# Create socket bind directory
+mkdir -p /run/mysqld
+chown mysql:mysql /run/mysqld
+
 if [ ! -d "/var/lib/mysql" ] || [ -z "$(ls -A /var/lib/mysql)" ]; then
 # To populate mariaDB data 
     if mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql; then
@@ -21,9 +25,35 @@ if [ ! -d "/var/lib/mysql" ] || [ -z "$(ls -A /var/lib/mysql)" ]; then
     fi
 fi
 
-# Create socket bind directory
-mkdir -p /run/mysqld
-chown mysql:mysql /run/mysqld
+# Start MariaDB in background (temporary)
+mariadbd --user=mysql &
+MARIADB_PID=$!
+
+# Wait for MariaDB to be ready to accept connnections
+echo "Waiting for MariaDB to be ready ..."
+for i in {30..0}; do
+	if mysqladmin ping -u root --silent >/dev/null 2>&1; then
+		echo "MariaDB is ready!"
+		break
+	fi
+	echo "Waiting... ($i seconds left)"
+	sleep 1
+done
+
+
+# Run initialization SQL using heredoc
+if [ -z "$MYSQL_DATABASE" ]; then
+	echo "Error: MYSQL_DATABASE not set"
+	exit 1
+fi
+
+mysql -u root <<EOF
+CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE
+EOF
+
+echo "Shutting down temporary MariaDB instance..."
+mysqladmin -u root shutdown
+wait $MARIADB_PID || true
 
 # Start MariaDB DAEMON (server)
 exec mariadbd --user=mysql
