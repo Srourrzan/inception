@@ -13,7 +13,7 @@
 
 # Create socket bind directory
 mkdir -p /run/mysqld
-chown mysql:mysql /run/mysqld
+chown -R mysql:mysql /run/mysqld
 
 if [ ! -d "/var/lib/mysql" ] || [ -z "$(ls -A /var/lib/mysql)" ]; then
 # To populate mariaDB data 
@@ -40,15 +40,20 @@ for i in {30..0}; do
 	sleep 1
 done
 
+# If the loop finished and i is 0, MariaDB failed to start
+if [ "$i" = 0 ]; then
+	echo "Error: MariaDB failed to start within 30 seconds."
+	exit 1
+fi
 
 # Run initialization SQL using heredoc
-if [ -z "$MYSQL_DATABASE" ]; then
-	echo "Error: MYSQL_DATABASE not set"
+if [ -z "$MYSQL_DATABASE" ] || [ -z "$MYSQL_USER"]; then
+	echo "Error: Missing required environment variabe"
 	exit 1
 fi
 
 mysql -u root <<EOF
-CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE
+CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;
 EOF
 
 echo "Shutting down temporary MariaDB instance..."
