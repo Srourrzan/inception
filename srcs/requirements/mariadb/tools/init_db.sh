@@ -11,13 +11,19 @@
 # 4. Stop the temporary MariaDB cleanly
 # 5. Start MariaDB in FOREGROUND using `exec` (this replaces the shell with MariaDB as PID 1)
 
-# To populate mariaDB data dir
-if mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql; then
-	echo "Success: mariaDB data dir wis populated."
-else
-	echo "Error: Failed to populate mariaDB data dir."
-	exit 1
+if [ ! -d "/var/lib/mysql" ] || [ -z "$(ls -A /var/lib/mysql)" ]; then
+# To populate mariaDB data 
+    if mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql; then
+	    echo "Success: mariaDB data dir wis populated."
+    else
+	    echo "Error: Failed to populate mariaDB data dir."
+	    exit 1
+    fi
 fi
 
-# Start MariaDB
-exec mariadb --user=mysql
+# Create socket bind directory
+mkdir -p /run/mysqld
+chown mysql:mysql /run/mysqld
+
+# Start MariaDB DAEMON (server)
+exec mariadbd --user=mysql
