@@ -11,6 +11,18 @@
 # 4. Stop the temporary MariaDB cleanly
 # 5. Start MariaDB in FOREGROUND using `exec` (this replaces the shell with MariaDB as PID 1)
 
+# Cleanup function
+MARIADB_PID=""
+cleanup() {
+	if [ -n "$MARIADB_PID" ]; then
+		echo "Cleaning up temporary MariaDB instance"
+		mysqladmin -u root shutdown || true
+		wait $MARIADB_PID || true
+	fi
+}
+
+trap cleanup EXIT # This will call `cleanup` on all exit cases
+
 # Create socket bind directory
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld
@@ -47,18 +59,21 @@ if [ "$i" = 0 ]; then
 fi
 
 # Run initialization SQL using heredoc
-if [ -z "$MYSQL_DATABASE" ] || [ -z "$MYSQL_USER"]; then
+if [ -z "$MYSQL_DATABASE" ] || [ -z "$MYSQL_USER" ] || [ -z "$MYSQL_PASSWORD" ]; then
 	echo "Error: Missing required environment variabe"
 	exit 1
 fi
 
 mysql -u root <<EOF
 CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;
+CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';
+FLUSH PRIVILEGES;
 EOF
 
-echo "Shutting down temporary MariaDB instance..."
-mysqladmin -u root shutdown
-wait $MARIADB_PID || true
+cleanup
+# Remove trap
+trap - EXIT
 
 # Start MariaDB DAEMON (server)
 exec mariadbd --user=mysql
