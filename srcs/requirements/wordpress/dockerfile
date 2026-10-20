@@ -1,0 +1,9 @@
+FROM debian:bookworm
+
+RUN apt-get update && apt-get install -y \
+    php8.2-fpm \
+	php-mysql \
+	mariadb-client \
+	wget \
+	curl \
+	&& rm -rf /var/lib/apt/lists/* #remove packeage cache
