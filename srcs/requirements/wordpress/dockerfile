@@ -7,3 +7,15 @@ RUN apt-get update && apt-get install -y \
 	wget \
 	curl \
 	&& rm -rf /var/lib/apt/lists/* #remove packeage cache
+
+WORKDIR /var/www/html
+
+COPY tools/init_wp.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init_wp.sh
+
+# Download and install wp-cli
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+
+ENTRYPOINT [ "/usr/local/bin/init_wp.sh" ]
