@@ -4,10 +4,8 @@ RUN apt-get update && apt-get install -y nginx openssl && rm -rf /var/lib/apt/li
 
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 
-COPY tools/certs/  /etc/nginx/ssl/
-
-COPY tools/certs.sh /usr/local/bin/
+COPY --chmod=755 tools/certs.sh /usr/local/bin/
 
 EXPOSE 443
 
-ENTRYPOINT [ "/usr/local/bin/certs.sh" ]
+ENTRYPOINT ["/usr/local/bin/certs.sh"]

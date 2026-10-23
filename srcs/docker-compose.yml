@@ -20,11 +20,21 @@ services:
     restart: unless-stopped
     volumes:
       - wp_data:/var/www/html
-    # ports:
-    #   - "9000:9000"
     depends_on:
       mariadb:
-        condition: service_healthy 
+        condition: service_healthy
+
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx
+    env_file: ./.env
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - wp_data:/var/www/html
+    depends_on:
+      - wordpress
 
 volumes:
   db_data:
