@@ -20,8 +20,8 @@ services:
     restart: unless-stopped
     volumes:
       - wp_data:/var/www/html
-    ports:
-      - "9000:9000"
+    # ports:
+    #   - "9000:9000"
     depends_on:
       mariadb:
         condition: service_healthy 
