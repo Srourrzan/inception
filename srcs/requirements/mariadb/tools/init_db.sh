@@ -23,6 +23,10 @@ cleanup() {
 
 trap cleanup EXIT # This will call `cleanup` on all exit cases
 
+# Read the secret file into a variable
+MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
+MYSQL_PASSWORD=$(cat /run/secrets/db_password)
+
 # Create socket bind directory
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld
