@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /var/www/html
 
+COPY conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
+
 COPY tools/init_wp.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/init_wp.sh
 

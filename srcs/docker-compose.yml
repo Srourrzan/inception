@@ -30,6 +30,7 @@ services:
     env_file: ./.env
     restart: unless-stopped
     ports:
+      - "80:80"
       - "443:443"
     volumes:
       - wp_data:/var/www/html
